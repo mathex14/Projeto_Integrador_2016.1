@@ -1,0 +1,61 @@
+//menu option select
+
+switch(mpos){
+    case 0:{
+    room_goto_next();
+    break;
+    }
+    
+    case 1:{
+    instance_deactivate_all( false ); 
+    instance_create(0,0,obj_instr_menu);
+    break;
+    }
+    
+    case 2:{
+    instance_deactivate_all( false ); 
+    instance_create(0,0,obj_cred_menu);
+    break;
+    }
+    
+    case 3:{
+    game_end();
+    break;
+    }
+}
+
+===========================================================
+
+///Draw text outline(texto contornado)
+
+var xx     = argument0;
+var yy     = argument1;
+var text   = argument2;
+var tcolor = argument3;
+var ocolor = argument4;
+var w      = argument5;
+
+draw_set_color(ocolor);
+
+draw_text(xx-w,yy,text);
+draw_text(xx+w,yy,text);
+draw_text(xx,yy-w,text);
+draw_text(xx,yy+w,text);
+
+draw_set_color(tcolor);
+
+draw_text(xx,yy,text);
+
+=========================================================
+
+///Plus points script
+
+xx     = argument0;
+yy     = argument1;
+text   = argument2;
+tcolor = argument3;
+spd    = argument4;
+
+draw_set_color(tcolor);
+
+draw_text(xx,yy,text);
