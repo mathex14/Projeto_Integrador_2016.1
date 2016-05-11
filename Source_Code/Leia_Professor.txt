@@ -1,4 +1,3 @@
 Professor, nesse diretório tem as pastas com todo o código que eu programei(os objetos e o script), mas como eu utilizei uma IDE 
-algumas coisas como as fases eu utilizei a IDE para fazer(utilizando os objetos criados por mim) ou as imagens que carreguei do meu
-pc utilizando a IDE e etc, no diretório acima do source_code("Projeto_Integrador_2016.1") se encontra todo o código do jogo
-(incluindo a parte da IDE, porém, o código é escrito de forma bem diferente), caso o  senhor queira dar uma olhada.
+algumas coisas como as fases eu utilizei a IDE para fazer(utilizando os objetos criados por mim) ou as imagens que carreguei do meu pc utilizando a IDE e etc, no diretório acima do source_code("Projeto_Integrador_2016.1") se encontra todo o código do jogo
+(incluindo a parte da IDE, porém, boa parte do código é exibido de forma diferente), caso o  senhor queira dar uma olhada.
