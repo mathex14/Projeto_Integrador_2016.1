@@ -1,0 +1,2653 @@
+Information about object: Player
+Sprite: P_Standing
+Solid: false
+Visible: true
+Depth: -2000
+Persistent: true
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+/// player status
+ivul=0;
+
+hsp = 0;
+vsp = 0;
+grounded = 0;
+grav=0;
+canmove=true;
+punching=0;
+ducking=0;
+D_punching=0;
+backdashing=0;
+JMP_punching=0;
+sloping=0;
+hurting=0;
+jmptpc=0;
+block_idle=0;
+minor_dmg=0;
+Gdown=0;
+isonplat=0;
+current_score=0;
+
+duagrui=0;
+Sl=0;
+
+if(grav<12)
+{
+grav += 1.3;
+}
+
+camface=0;
+camface2=0;
+
+//Elementos RPG, não foram utilizados
+
+//global.exper = 0;
+//global.money = 0;
+//global.level = 1;
+global.Max_HP=200; //Life máximo do personagem
+
+//Life
+
+HP=global.Max_HP;
+
+instance_create(x,y,Life);
+instance_create(x,y,obj_score);
+
+//Campo de força
+global.Efield=1;
+
+
+
+execute code:
+
+/// Velocidade da sprite
+image_speed=0.2
+
+execute code:
+
+///Direção do personagem
+
+mydir=1;
+
+execute code:
+
+///Contadores
+
+counter=0;
+D_counter=0;
+P_counter=0;
+DP_counter=0;
+BD_counter=0;
+DMG_counter=0;
+JPP_counter=0;
+
+execute code:
+
+///Música
+
+if(HP>0)
+{audio_play_sound(main_theme, 10, true);}
+
+Step Event:
+
+execute code:
+
+/// Movimento to player
+
+key_left = keyboard_check_direct(vk_left);
+key_right = keyboard_check_direct(vk_right);
+key_down = keyboard_check(vk_down);
+check_down = keyboard_check_direct(vk_down);
+key_jmp = keyboard_check(ord("X"));
+check_jmp = keyboard_check_direct(ord("X"));
+key_punch = keyboard_check_pressed(ord("Z"));
+key_backD = keyboard_check_pressed(ord("A"));
+
+if(hsp==0)
+{
+sprite_index=P_Standing;
+image_speed=0.2
+}
+
+//Se esquerda for pressionada
+if (key_left && !backdashing  && !minor_dmg){
+   if mydir != -1 {mydir = -1}
+   camface=-32;
+   if (hsp>0)
+    {
+     hsp=0;
+    }
+   if(hsp>)
+   {
+   if(hsp>
+   {
+    if(canmove && !backdashing){hsp-=0.5;}
+    if(grounded==1)
+        { 
+        image_speed=0.6
+        sprite_index=P_Pre_Run;
+        }
+   }
+    else
+   {
+    if (canmove && !backdashing){hsp-=1;}
+    if mydir != -1 {mydir = -1} 
+        if(grounded==1)
+        {
+        image_speed=0.6
+        sprite_index=P_Running;
+        }
+   }
+   }
+}
+
+//Se direita for pressionada
+if (key_right && !backdashing && !minor_dmg){
+
+    if mydir != 1 {mydir = 1} 
+    camface=32;
+    if (hsp<0)
+    {
+     hsp=0;
+   }
+   if(hsp<
+   {
+   if(hsp<
+   {
+
+    if(canmove && !backdashing){hsp+=0.5;}
+        if(grounded==1)
+        {
+        image_speed=0.6;
+        sprite_index=P_Pre_Run;
+        }
+    }
+    else
+    {
+    if(canmove && !backdashing){hsp+=1;}
+    if mydir != 1 {mydir = 1} 
+        if(grounded==1)
+        {
+        image_speed=0.6;
+        sprite_index=P_Running;
+        }
+   }
+   }
+}
+
+if((!key_left && !key_right) or (key_left && key_right)) && (!backdashing)
+{
+    hsp= 0;
+    camface=0;
+}
+
+//definindo efeito da gravidade
+vsp+=grav; 
+
+//Colisão horizontal
+var hcollide;
+hcollide=instance_place(x+hsp,y,Wall_pr);
+if(hcollide!=noone)
+{
+
+    if(hcollide)
+    {
+        yplus = 0;
+        while (place_meeting(x+hsp,y-yplus,Wall_pr) && yplus <bs(1*hsp)) yplus += 4; 
+        if place_meeting(x+hsp,y-yplus,Wall_pr)                              
+        {
+        while(!place_meeting(x+sign(hsp), y, Wall_pr)){ x += sign(hsp);}                
+        hsp = 0; 
+        }
+        else                                                                           
+        {
+        y -= yplus;
+        while (!place_meeting(x+hsp,y,Wall_pr)){y+=1;}
+        }
+        
+    }
+}
+
+//Descendo ladeira
+var Dscollide;
+Dscollide=instance_place(x,y+1,Wall_pr);
+if(Dscollide!=noone)
+{
+    if (Dscollide) //place_meeting(x, y+1, Wall_pr) 
+    {
+    yminus = abs(hsp); 
+    while (place_meeting(x+hsp,y+yminus,Wall_pr)) && yminus >minus--; 
+    y += yminus
+    }
+}
+      
+//Definindo movimento horizontal
+x+=hsp; 
+
+//Colisão vertical
+var vcollide;
+vcollide=instance_place(x,y+vsp,Wall_pr);
+if(vcollide!=noone)
+{
+    //if(place_meeting(x,y+1,Wall_pr)){grounded=1;} else {grounded=0;}
+    if (vcollide) 
+    {
+        while(!place_meeting(x, y+sign(vsp), Wall_pr)) y+= sign(vsp);
+        if (sign(vsp)==1){grounded=1;}
+        vsp=0;
+    
+    }
+
+}
+else
+{grounded=0;}
+
+
+
+//Definindo movimento vertical
+y+=vsp;
+
+//Camera
+view_xview[0]+= ((x-(view_wview[0]/2)-view_xview[0]) +camface )* 0.05;
+view_yview[0]+= ((y-(view_wview[0]/2)-view_yview[0])+80 +camface2 )* 0.5;
+
+execute code:
+
+///Pulando
+
+
+if(key_jmp && !minor_dmg)
+{   
+    if(backdashing)
+    {
+    hsp=0;
+    }
+    if(grounded==1)
+    {
+    vsp-=25;
+    }
+}
+
+if(!check_jmp && vsp<0)
+{
+   vsp=vsp/1.5;
+}
+
+if(vsp<& grounded!=1)
+{
+    camface2=vsp*(-2);
+    if (counter == 10)
+    {
+    image_speed=0;
+    sprite_index = P_JMP;
+    image_index = 1;
+    }
+    else
+    {
+    image_speed=0;
+    sprite_index = P_JMP;
+    image_index = 0;
+    counter++;
+    }
+}
+
+if(vsp>=0 && grounded!=1)
+{
+    if (vsp==0)
+    {
+    camface2/=2;
+    image_speed=0;
+    image_index = 0;
+    sprite_index = P_Falling;
+    }
+    else if (vsp>
+    {
+    camface2=vsp*2;
+    image_speed=0;
+    image_index = 1;
+    sprite_index = P_Falling;
+    }
+}
+
+if(grounded)
+{
+    counter=0;
+    if(hsp==0)
+    {
+    image_speed= 0.2;
+    sprite_index=P_Standing;
+    }
+    else if (hsp!=0)
+    {
+    image_speed= 0.6;
+    sprite_index=P_Running;
+    }
+
+}
+
+if(vsp!=0)
+{grounded=0;}
+
+
+execute code:
+
+///Se abaixando
+
+if (key_down && grounded && !punching && !backdashing && !minor_dmg)
+{
+canmove=false;
+hsp=0;
+ducking=1;
+sprite_index=P_BF_JMP_DUCK;
+    if(D_counter>0)
+    {
+    image_index=0;
+    sprite_index=P_Ducking;
+        if(D_counter>
+        {
+        image_index=1;
+        sprite_index=P_Ducking;
+        }
+    }
+}
+
+if(check_down && ducking)
+{
+ducking=1;
+D_counter++;
+}
+
+if((!key_down && !check_down) || !grounded)
+{ducking=0;}
+
+if(!ducking)
+{
+D_counter=0;
+canmove=true;
+}
+
+execute code:
+
+///Socando
+
+if (key_punch && grounded && !ducking && !backdashing && !minor_dmg)
+{
+image_speed=0;
+punching=1;
+canmove=false; 
+hsp=hsp/2;
+image_index=0;
+sprite_index=P_Punching;
+}
+
+if(punching)
+{
+if(P_counter>1)
+{
+hsp=hsp/2;
+image_index=1;
+sprite_index=P_Punching;
+    if(P_counter>
+    {
+    hsp=0;
+    image_index=3;
+    sprite_index=P_Punching;
+        if(P_counter>
+        {
+        image_index=2;
+        sprite_index=P_Punching;
+            if(P_counter>
+            {
+            punching=0;
+            canmove=true;
+            image_speed= 0.2;
+            sprite_index=P_Standing;
+            }
+        }
+        
+    }
+}
+
+}
+
+if(P_counter>& P_counter<5)
+{
+var inst; 
+if (mydir=1)
+{inst = instance_create(x+40, y-45, Punch_Hitbox);}
+else if(mydir=-1)
+{inst = instance_create(x-40, y-45, Punch_Hitbox);}
+}
+
+if(punching)
+{P_counter++;}
+else
+{P_counter=0;}
+
+if(!grounded)
+{punching=0;}
+
+if(P_counter==1)
+{audio_play_sound(punch_wnoise, 10, false);}
+
+execute code:
+
+///Backdashing
+
+if (key_backD && grounded && !minor_dmg)
+{
+punching=0;
+D_punching=0;
+ducking=0;
+image_speed=0;
+backdashing=1;
+hsp=0;
+if (mydir == 1) 
+{hsp-=14;} 
+else if (mydir==-1)
+{hsp+=14;}  
+canmove=false;
+image_index=0;
+sprite_index=P_Backdashing;
+}
+
+if(BD_counter>1 && grounded)
+{   
+    image_index=1;
+    sprite_index=P_Backdashing;
+        if(BD_counter>
+        {
+        image_index=2;
+        sprite_index=P_Backdashing;
+            if(BD_counter>
+            {
+            image_index=3;
+            sprite_index=P_Backdashing;
+                if(BD_counter>
+                {
+                image_index=2;
+                sprite_index=P_Backdashing;
+                    if(BD_counter>
+                    {
+                    hsp=hsp/2;
+                    backdashing=0;
+                    canmove=true;
+                    image_speed= 0.2;
+                    sprite_index=P_Standing;
+                    }
+                }
+            }
+        
+        }
+}
+
+if(backdashing)
+{BD_counter++;}
+else
+{BD_counter=0;}
+
+if(!grounded){backdashing=0;}
+
+if(BD_counter==1)
+{audio_play_sound(backdash_noise, 10, false);}
+
+execute code:
+
+///Socando abaixado
+
+if (key_punch && ducking)
+{
+image_speed=0;
+D_punching=1;
+canmove=false;
+image_index=1;
+sprite_index=P_Duck_Punching;
+}
+
+if(D_punching)
+{
+if(DP_counter>1)
+{
+image_index=2;
+sprite_index=P_Duck_Punching;
+    if(DP_counter>
+    {
+    hsp=0;
+    image_index=4;
+    sprite_index=P_Duck_Punching;
+        if(DP_counter>
+        {
+        image_index=3;
+        sprite_index=P_Duck_Punching;
+            if(DP_counter>
+            {
+            D_punching=0;
+            canmove=true;
+            image_index=1;
+            sprite_index=P_Ducking;
+            }
+        }
+        
+    }
+}
+
+}
+
+if(DP_counter>& DP_counter<5)
+{
+var inst;
+if (mydir=1)
+{inst = instance_create(x+54, y+15, Punch_Hitbox);}
+else if(mydir=-1)
+{inst = instance_create(x-54, y+15, Punch_Hitbox);}
+}
+
+if(D_punching)
+{DP_counter++;}
+else
+{DP_counter=0;}
+
+if(DP_counter==1)
+{audio_play_sound(punch_wnoise, 10, false);}
+
+execute code:
+
+///Soco enquanto no ar
+
+if (key_punch && !grounded && !minor_dmg)
+{
+image_speed=0;
+JMP_punching=1;
+image_index=0;
+sprite_index=P_JMP_Punch;
+}
+
+if(JMP_punching)
+{
+if(JPP_counter>1)
+{
+image_index=1;
+sprite_index=P_JMP_Punch;
+    if(JPP_counter>
+    {
+    image_index=3;
+    sprite_index=P_JMP_Punch;
+        if(JPP_counter>
+        {
+        image_index=2;
+        sprite_index=P_JMP_Punch;
+            if(JPP_counter>
+            {
+            JMP_punching=0;
+            }
+        }
+        
+    }
+}
+
+}
+
+if(JPP_counter>& JPP_counter<5)
+{
+var inst; 
+if (mydir=1)
+{inst = instance_create(x+50, y-50, Punch_Hitbox);}
+else if(mydir=-1)
+{inst = instance_create(x-50, y-50, Punch_Hitbox);}
+}
+
+if(JMP_punching)
+{JPP_counter++;}
+else
+{JPP_counter=0;}
+
+if(grounded)
+{JPP_counter=0;JMP_punching=0;}
+
+if(JPP_counter==1)
+{audio_play_sound(punch_wnoise, 10, false);}
+
+execute code:
+
+///Colisão com o inimigo
+
+
+if(minor_dmg)
+{
+    ivul=1;
+    punching=0;
+    D_punching=0;
+    backdashing=0;
+    punching=0;
+    ducking=0;
+    canmove=false;
+    
+    vsp=0;
+    
+    sprite_index=P_Minor_DMG;
+    image_index=0;
+    image_speed=0;
+    hsp=0;
+    
+    if(DMG_counter>1)
+        {
+           image_index=1;
+           sprite_index=P_Minor_DMG;
+            if(DMG_counter>
+            {
+            image_index=2;
+            sprite_index=P_Minor_DMG;
+                if(DMG_counter>
+                {
+                image_index=1;
+                sprite_index=P_Minor_DMG;
+                    if(DMG_counter>
+                    {
+                    minor_dmg=0;
+                    ivul=0;
+                    canmove=true;
+                    image_speed= 0.2;
+                    sprite_index=P_Standing;
+                    }
+                }
+            }
+        }
+}
+
+
+if(minor_dmg)
+{DMG_counter++;}
+else
+{DMG_counter=0;}
+
+
+execute code:
+
+///Morte
+
+if(HP<=0)
+{
+HP=0;
+audio_stop_sound(main_theme);
+audio_play_sound(Death_sound, 10, false);
+with (obj_pause) instance_destroy();
+with (obj_score) instance_destroy();
+with (Life) instance_destroy();
+instance_destroy();
+room_goto(FimJogo);
+}
+
+Draw Event:
+
+execute code:
+
+///Setador de direção
+draw_sprite_ext(sprite_index,image_index,x,y,mydir,image_yscale,image_angle,c_white,image_alpha);
+
+execute code:
+
+///Efeito da personagem se ferindo
+
+
+if(DMG_counter>1 && DMG_counter<3)
+{
+d3d_set_fog(true, c_red, 0, 0);
+draw_sprite_ext(sprite_index,image_index,x,y,mydir,image_yscale,image_angle,c_red,image_alpha);
+d3d_set_fog(false, c_white, 0, 0);
+}
+
+if(DMG_counter>& DMG_counter<
+{
+d3d_set_fog(false, c_white, 0, 0);
+}
+
+if(DMG_counter>& DMG_counter<
+{
+d3d_set_fog(true, c_red, 0, 0);
+draw_sprite_ext(sprite_index,image_index,x,y,mydir,image_yscale,image_angle,c_red,image_alpha);
+d3d_set_fog(false, c_white, 0, 0);
+
+}
+if(DMG_counter>
+{
+d3d_set_fog(false, c_white, 0, 0);
+}
+
+if(DMG_counter=0)
+{d3d_set_fog(false, c_white, 0, 0);}
+
+______________________________________________________
+
+Information about object: Life
+Sprite: 
+Solid: false
+Visible: true
+Depth: -1000000
+Persistent: true
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Draw Event:
+
+execute code:
+
+///Desenhando o HUD
+
+draw_sprite(Health_Bg,0,view_xview[0]+60,view_yview[0]+17);
+
+if(Player.HP/global.Max_HP<=1 && Player.HP/global.Max_HP>0)
+{
+draw_sprite_ext(Health_Inner,0,view_xview[0]+68,view_yview[0]+20, Player.HP/global.Max_HP,1,0,c_white,1);
+}
+else if(Player.HP/global.Max_HP>
+{
+Player.HP=global.Max_HP;
+draw_sprite_ext(Health_Inner,0,view_xview[0]+68,view_yview[0]+20, Player.HP/global.Max_HP,1,0,c_white,1);
+}
+else if(Player.HP/global.Max_HP<
+{
+Player.HP=0;
+draw_sprite_ext(Health_Inner,0,view_xview[0]+68,view_yview[0]+20, Player.HP/global.Max_HP,1,0,c_white,1);
+}
+
+
+draw_sprite(Health_Border,0,view_xview[0]+30,view_yview[0]+15);
+
+______________________________________________________
+
+Information about object: Punch_Hitbox
+Sprite: PP_hit
+Solid: false
+Visible: false
+Depth: -100000
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Vars
+
+counter=0;
+
+Step Event:
+
+execute code:
+
+///Duração do soco(hitbox)
+
+if(counter>0)
+{instance_destroy();}
+
+
+counter++;
+
+______________________________________________________
+
+Information about object: Block
+Sprite: 
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Block2
+Sprite: over_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: underBlock2
+Sprite: under_brick
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: conBlock2
+Sprite: Con_Brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: leftBlock2
+Sprite: left_over_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: leftUnderBlock
+Sprite: left_under_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: UP_leftBlock
+Sprite: LU_over_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: UP_underleftBlock
+Sprite: LU_under_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: LCorner_Block2
+Sprite: LCorner_Over_Brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: LCornerUnderBlock2
+Sprite: LCorner_Under_Brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: LuCorner_Block2
+Sprite: LuCorner_Over_Brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: LuCornerUnderBlock2
+Sprite: LuCorner_Under_Brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Upper_over_Block
+Sprite: Upper_over_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Upper_under_Block
+Sprite: Upper_under_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Upper_connect_Block
+Sprite: Upper_Con_Brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Stair_over_block
+Sprite: Stair
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Wall_StairL
+Sprite: Brick_LSlide
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Wall_StairL_Under
+Sprite: Brick_Under_LSlide
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Wall_StairR
+Sprite: Brick_RSlide
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Wall_Stair_R_Under
+Sprite: Brick_Under_RSlide
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Stair_under_block
+Sprite: Stair_under
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: rightBlock2
+Sprite: right_over_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: rightUnderBlock2
+Sprite: right_under_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: RCorner_Block2
+Sprite: RCorner_over_brick
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: RCornerUnderBlock2
+Sprite: RCorner_under_brick
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: UP_underrigntBlock
+Sprite: RU_Under_Brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: UP_rightBlock
+Sprite: RU_Over_Brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: RuCorner_Block2
+Sprite: RuCorner_Over_Brick
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: RuCornerUnderBlock2
+Sprite: RuCorner_Under_Brick
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: LAbvBlock2
+Sprite: Above_tiler_left
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Left_plat_block2
+Sprite: Left_plat_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Right_plat_Block2
+Sprite: Right_plat_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Middle_plat_block2
+Sprite: Middle_plat_brick
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: RAbvBlock2
+Sprite: Above_tiler_right
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Wall_pr
+Sprite: 
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+
+Children
+Block
+Block2
+underBlock2
+conBlock2
+leftBlock2
+leftUnderBlock
+UP_leftBlock
+UP_underleftBlock
+LCorner_Block2
+LCornerUnderBlock2
+LuCorner_Block2
+LuCornerUnderBlock2
+Upper_over_Block
+Upper_under_Block
+Upper_connect_Block
+Stair_over_block
+Wall_StairL
+Wall_StairL_Under
+Wall_StairR
+Wall_Stair_R_Under
+Stair_under_block
+rightBlock2
+rightUnderBlock2
+RCorner_Block2
+RCornerUnderBlock2
+UP_underrigntBlock
+UP_rightBlock
+RuCorner_Block2
+RuCornerUnderBlock2
+LAbvBlock2
+Left_plat_block2
+Right_plat_Block2
+Middle_plat_block2
+RAbvBlock2
+jmp_through_plat
+jmp_through_platR
+jmp_though_platL
+Big_Grey
+Spike_block
+Force_field
+
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Setando o tipo
+
+type=1;
+
+______________________________________________________
+
+Information about object: Enemy_parent
+Sprite: 
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+
+Children
+Bat
+Bat2
+
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Slope_pr
+Sprite: 
+Solid: true
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Bat
+Sprite: Bat_idle
+Solid: false
+Visible: true
+Depth: -1000
+Persistent: false
+Parent: Enemy_parent
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Status
+
+Bat_counter=0;
+mimov_counter=0;
+flying=0;
+life=100;
+myspeed=0;
+
+hsp = 0;
+vsp = 0;
+
+Step Event:
+
+execute code:
+
+///Direção
+
+if(Player.x<x)
+{mydir=-1;}
+else if(Player.x>x)
+{mydir=1;}
+
+execute code:
+
+///Movimento
+
+//Definindo movimento vertical
+y+=vsp;
+
+//Definindo movimento horizontal
+x+=hsp;
+
+if(hsp>0)
+{
+mydir=1;
+}
+else if(hsp<0)
+{
+mydir=-1;
+}
+
+execute code:
+
+///Ataque
+
+if((Player.bbox_bottom)>y)
+{
+if(point_distance(x, y, Player.x, Player.y)<350)
+{flying=1;}
+}
+
+if(flying)
+{
+if(mydir=-1)
+{myspeed=-7;}
+else if(mydir=1)
+{myspeed=7;}
+}
+
+if(flying)
+{
+if(Bat_counter<
+{
+image_speed=0;
+image_index=0;
+sprite_index=Bat_flying;
+}
+if(Bat_counter>
+{
+hsp=myspeed;
+image_index=1;
+sprite_index=Bat_flying;
+    if(Bat_counter>
+    {
+    hsp=myspeed;
+    image_index=2;
+    sprite_index=Bat_flying;
+        if(Bat_counter>
+        {
+        image_index=1;
+        sprite_index=Bat_flying;
+            if(Bat_counter>
+            {
+            Bat_counter=0;
+            }
+        }
+        
+    }
+}
+
+}
+
+if(flying)
+{Bat_counter++;mimov_counter++;}
+else
+{Bat_counter=0;mimov_counter=0;}
+
+if(mimov_counter>& mimov_counter<
+{
+if(vsp<){vsp+=0.4};
+}
+else if(mimov_counter>
+{
+if(vsp>2){vsp-=0.4};
+}
+
+if(mimov_counter==40 || mimov_counter==80){vsp/=2;}
+
+if(mimov_counter>
+{mimov_counter=1;}
+
+execute code:
+
+///Colisão com o player
+
+if(place_meeting(x,y,Player))
+{
+    if(!Player.ivul)
+    {
+    audio_play_sound(punch_hnoise, 10, false);
+    Player.HP-=30;
+    Player.minor_dmg=1;
+    }
+}
+
+execute code:
+
+///Bat morrendo
+
+if(life<=0)
+{
+instance_create(x,y,LotsofBlood);
+instance_destroy();
+}
+
+execute code:
+
+///Sendo atacado
+
+if(place_meeting(x,y,Punch_Hitbox))
+{
+    draw_set_font(fnt_points);
+    plus_points(x,y+bbox_bottom/2,100,c_white,1);
+    Player.current_score+=100;
+    life-=100;
+    instance_create(x-9,y+2,obj_hit_effect)
+}
+
+Draw Event:
+
+execute code:
+
+///Setador de direção
+draw_sprite_ext(sprite_index,image_index,x,y,mydir,image_yscale,image_angle,c_white,image_alpha);
+
+______________________________________________________
+
+Information about object: Bat2
+Sprite: Bat2_idle
+Solid: false
+Visible: true
+Depth: -1000
+Persistent: false
+Parent: Enemy_parent
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Status
+
+Bat_counter=0;
+mimov_counter=0;
+flying=0;
+life=100;
+myspeed=0;
+
+hsp = 0;
+vsp = 0;
+
+Step Event:
+
+execute code:
+
+///Direção
+
+if(Player.x<x)
+{mydir=-1;}
+else if(Player.x>x)
+{mydir=1;}
+
+execute code:
+
+///Movimento
+
+//Definindo movimento vertical
+y+=vsp;
+
+//Definindo movimento horizontal
+x+=hsp;
+
+if(hsp>0)
+{
+mydir=1;
+}
+else if(hsp<0)
+{
+mydir=-1;
+}
+
+execute code:
+
+///Ataque
+
+
+if((Player.bbox_bottom)>y)
+{
+if(point_distance(x, y, Player.x, Player.y)<500)
+{flying=1;}
+}
+
+if(flying)
+{
+if(mydir=-1)
+{myspeed=-5;}
+else if(mydir=1)
+{myspeed=5;}
+}
+
+if(flying)
+{
+if(Bat_counter<
+{
+image_speed=0;
+image_index=0;
+sprite_index=Bat2_flying;
+}
+if(Bat_counter>
+{
+hsp=myspeed;
+image_index=1;
+sprite_index=Bat2_flying;
+    if(Bat_counter>
+    {
+    hsp=myspeed;
+    image_index=2;
+    sprite_index=Bat2_flying;
+        if(Bat_counter>
+        {
+        image_index=1;
+        sprite_index=Bat2_flying;
+            if(Bat_counter>
+            {
+            Bat_counter=0;
+            }
+        }
+        
+    }
+}
+
+}
+
+if(flying)
+{Bat_counter++;mimov_counter++;}
+else
+{Bat_counter=0;mimov_counter=0;}
+
+if(mimov_counter>& mimov_counter<)
+{
+if(vsp<){vsp+=0.5};
+}
+else if(mimov_counter>)
+{
+if(vsp>2){vsp-=0.2};
+}
+
+if((Player.bbox_bottom-92)<& flying && mimov_counter>
+{
+mimov_counter=120;
+}
+
+if((Player.y-y)> && flying && mimov_counter<
+{if (vsp<vsp+=1;}
+else if((Player.y-y)> && (Player.y-y)< && flying && mimov_counter<)
+{if vsp>sp/=1.1}}
+
+execute code:
+
+///Colisão com o player
+
+if(place_meeting(x,y,Player))
+{
+    if(!Player.ivul)
+    {
+    audio_play_sound(punch_hnoise, 10, false);
+    Player.HP-=30;
+    Player.minor_dmg=1;
+    }
+}
+
+execute code:
+
+///Bat morrendo
+
+if(life<=0)
+{
+instance_create(x,y,LotsofBlood);
+instance_destroy();
+}
+
+execute code:
+
+///Sendo atacado
+
+if(place_meeting(x,y,Punch_Hitbox))
+{
+    Player.current_score+=100;
+    life-=100;
+    instance_create(x-9,y+2,obj_hit_effect)
+}
+
+Draw Event:
+
+execute code:
+
+///Setador de direção
+draw_sprite_ext(sprite_index,image_index,x,y,mydir,image_yscale,image_angle,c_white,image_alpha);
+
+______________________________________________________
+
+Information about object: LotsofBlood
+Sprite: 
+Solid: false
+Visible: true
+Depth: -1500
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Setando o contador
+
+counter=0;
+
+Step Event:
+
+execute code:
+
+///Animação do sangue(morcego morrendo)
+
+if(counter>1)
+{
+image_speed=0;
+hsp=0;
+image_index=0;
+sprite_index=Big_blood;
+    if(counter>
+    {
+    image_index=1;
+    sprite_index=Big_blood;
+        if(counter>
+        {
+        image_index=3;
+        sprite_index=Big_blood;
+            if(counter>
+            {
+            image_index=3;
+            sprite_index=Big_blood;
+                if(counter>
+                {
+                image_index=4;
+                sprite_index=Big_blood;
+                    if(counter>
+                    {
+                    image_index=5;
+                    sprite_index=Big_blood;
+                        if(counter>
+                        {
+                        image_index=6;
+                        sprite_index=Big_blood;
+                            if(counter>
+                            {
+                            instance_destroy();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+counter++;
+
+______________________________________________________
+
+Information about object: obj_hit_effect
+Sprite: 
+Solid: false
+Visible: true
+Depth: -10000
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Setando as coisas
+
+counter=0;
+
+audio_play_sound(punch_hnoise, 10, false);
+
+Step Event:
+
+execute code:
+
+///Hit faísca
+
+if(counter>1)
+{
+image_speed=0;
+hsp=0;
+image_index=0;
+sprite_index=Hit_effect;
+    if(counter>
+    {
+    image_index=1;
+    sprite_index=Hit_effect;
+        if(counter>
+        {
+        image_index=2;
+        sprite_index=Hit_effect;
+            if(counter>
+            {
+            image_index=3;
+            sprite_index=Hit_effect;
+                if(counter>
+                {
+                image_index=4;
+                sprite_index=Hit_effect;
+                    if(counter>
+                    {
+                    image_index=5;
+                    sprite_index=Hit_effect;
+                        if(counter>
+                        {
+                        instance_destroy();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+counter++;
+
+______________________________________________________
+
+Information about object: Obj_warp
+Sprite: spr_warp
+Solid: false
+Visible: false
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Collision Event with object Player:
+
+execute code:
+
+///Colisão(warp)
+
+Player.x = targ_x;
+Player.y = targ_y;  
+
+room_goto(targ_R); 
+
+
+______________________________________________________
+
+Information about object: obj_fade
+Sprite: 
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Status
+
+fadeIn=true;
+alpha=1;
+alarm[0] = room_speed*0.05;
+
+Alarm Event for alarm 0:
+
+execute code:
+
+///Mi alarm
+
+if(fadeIn==true)
+{
+    if (alpha>0)
+    {
+    alpha-=0.015;
+    alarm[0]=alarm[0]=room_speed
+    }
+
+}
+
+______________________________________________________
+
+Information about object: Obj_menu
+Sprite: spr_menu_cursor
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Menu stuff
+
+menu[0]="Iniciar";
+menu[1]="Instrucoes";
+menu[2]="Creditos"
+menu[3]="Sair"
+
+space=52;
+mpos=0;
+
+with (obj_pause) instance_destroy();
+
+global.Efield=1;
+
+
+
+Step Event:
+
+execute code:
+
+///Movimento no menu
+
+var move=0;
+
+move-=max(keyboard_check_pressed(vk_up), keyboard_check_pressed(ord("W")),0);
+move+=max(keyboard_check_pressed(vk_down), keyboard_check_pressed(ord("S")),0);
+
+if(move != 0)
+{
+    mpos +=move;
+    if(mpos<0){mpos = array_length_1d(menu)=1;}
+    if(mpos>array_length_1d(menu)-1) {mpos =0;}
+}
+
+var push;
+
+push=max(keyboard_check_pressed(vk_enter), keyboard_check_pressed(vk_space),0);
+if(push==1)
+{
+scr_menu();
+}
+
+Draw Event:
+
+execute code:
+
+///Drawing menu
+
+draw_set_halign(fa_left);
+draw_set_valign(fa_middle);
+draw_set_font(fnt_options);
+
+draw_set_color(c_white);
+
+var m;
+
+for (m=0; m<array_length_1d(menu);m+=1)
+{
+    draw_text(x+space,y+(m*space), string(menu[m]))
+}
+
+draw_sprite(sprite_index,0,x+16,y+mpos*space)
+
+______________________________________________________
+
+Information about object: obj_pause
+Sprite: 
+Solid: false
+Visible: true
+Depth: 0
+Persistent: true
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Setando a global "pause"
+
+global.pause=0;
+
+Key Press Event for Key:
+
+execute code:
+
+///Pausando/tirando a pausa
+
+if(global.pause==0)
+{
+global.pause=1;
+instance_deactivate_all( false ); 
+instance_create( x, y, obj_pause_menu ); //This will be active
+}
+
+
+______________________________________________________
+
+Information about object: obj_pause_menu
+Sprite: 
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Draw Event:
+
+execute code:
+
+///Drawing pause stuff
+
+if(global.pause)
+{
+    draw_set_color(c_black);
+    draw_set_halign(fa_center);
+    draw_rectangle(0,0,room_width,room_height,0);
+    draw_set_font(fnt_menu);
+    draw_set_color(c_white);
+    draw_set_alpha(1);
+    draw_text(view_xview[0]+view_wview[0]/2,view_yview[0]+view_hview[0]/2, "PAUSED
+    
+    Pressione ESC para voltar para o menu");
+    draw_set_color(c_black);
+    draw_set_halign(fa_left);
+    
+}
+
+Key Press Event for Key:
+
+execute code:
+
+///Pausando
+
+global.pause=0;
+instance_activate_all();
+instance_destroy();
+
+
+Key Press Event for Key:
+
+execute code:
+
+///Ir para o menu
+
+game_restart();
+
+______________________________________________________
+
+Information about object: GmOv_menu
+Sprite: 
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Draw Event:
+
+execute code:
+
+///Drawing text
+
+    draw_set_halign(fa_center);
+    draw_set_font(fnt_menu);
+    draw_set_color(c_white);
+    draw_set_alpha(1);
+    draw_text(view_xview[0]+view_wview[0]/2,view_yview[0]+view_hview[0]/2, "
+    
+    
+    
+    
+    
+    Pressione 'ENTER' para continuar");
+    draw_set_color(c_black);
+    
+
+Key Press Event for Key:
+
+execute code:
+
+///Reiniciar o game
+
+game_restart();
+
+
+______________________________________________________
+
+Information about object: Won_menu
+Sprite: 
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Excluindo instâncias
+
+highscore_add("",Player.current_score)
+
+audio_stop_sound(main_theme);
+with (obj_pause) instance_destroy();
+with (Life) instance_destroy();
+with (Player) instance_destroy();
+
+Draw Event:
+
+execute code:
+
+///Desenhando o menu
+
+    draw_set_halign(fa_center);
+    draw_set_font(fnt_menu);
+    draw_set_color(c_white);
+    draw_set_alpha(1);
+    draw_text(view_xview[0]+view_wview[0]/2,view_yview[0]+view_hview[0]/2, "Pressione 'ENTER' para continuar");
+    draw_set_color(c_black);
+    
+
+Key Press Event for Key:
+
+execute code:
+
+///Reiniciar o game
+
+game_restart();
+
+
+______________________________________________________
+
+Information about object: obj_instr_menu
+Sprite: 
+Solid: false
+Visible: true
+Depth: -1000
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Draw Event:
+
+execute code:
+
+///Drawing instructions
+
+    draw_set_color(c_black);
+    draw_rectangle(0,0,room_width,room_height,0);
+    draw_set_halign(fa_center);
+    draw_set_font(fnt_menu);
+    draw_set_color(c_white);
+    draw_set_alpha(1);
+    draw_text(view_xview[0]+view_wview[0]/2,view_yview[0]+view_hview[0]/2, "Instrucoes: Pressione as teclas direcionais para movimentar a personagem;
+    
+    Pressione a tecla 'x' para pular;
+    
+    Pressione a tecla 'a' para fazer a esquiva;
+    
+    Pressione a tecla 'z' para dar um soco;
+    
+    Pressione a tecla 'enter' durante o jogo, para pausa-lo;
+    
+    Objetivo: Encontre alguma forma de sair do castelo, voce podera escolher entre diversos caminhos diferentes... Divirta-se!
+    
+    
+    
+    
+    Pressione ESC para sair das instrucoes");
+    draw_set_color(c_black);
+
+Key Press Event for Key:
+
+execute code:
+
+///Saindo das instruções
+
+instance_activate_all();
+instance_destroy();
+
+
+______________________________________________________
+
+Information about object: obj_cred_menu
+Sprite: 
+Solid: false
+Visible: true
+Depth: -1000
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Draw Event:
+
+execute code:
+
+///Drawing creditos stuff
+
+
+    draw_set_color(c_black);
+    draw_rectangle(0,0,room_width,room_height,0);
+    draw_set_halign(fa_center);
+    draw_set_font(fnt_menu);
+    draw_set_color(c_white);
+    draw_set_alpha(1);
+    draw_text(view_xview[0]+view_wview[0]/2,view_yview[0]+view_hview[0]/2, "Criado por:    
+    
+    Mathias Barbosa Paz de Freitas
+    
+    Rivaldo Gomes da Silva
+    
+    Vinicius Alexandre Silva Correia
+    
+    
+    
+    Pressione ESC para sair dos creditos");
+    draw_set_color(c_black);
+
+Key Press Event for Key:
+
+execute code:
+
+///Saindo das instruções
+
+instance_activate_all();
+instance_destroy();
+
+
+______________________________________________________
+
+Information about object: obj_score
+Sprite: 
+Solid: false
+Visible: true
+Depth: -100000
+Persistent: true
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Draw Event:
+
+execute code:
+
+///Drawing score
+
+col=make_color_rgb(255, 255, 255);
+
+draw_set_font(fnt_score);
+draw_sprite(score_spr,0,view_xview[0]+820,view_yview[0]+17);
+draw_text_outline(view_xview[0]+960,view_yview[0]+32,Player.current_score,col,c_black, 1);
+
+______________________________________________________
+
+Information about object: jmp_through_plat
+Sprite: jmp_through_platform1M
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Setando sem sprite
+
+sprite_index=-1;
+algo=0;
+
+Step Event:
+
+execute code:
+
+/// Se o player está ou não está acima
+
+if(instance_exists(Player))
+{
+    if (Player.bbox_bottom>y) || (Player.Gdown)
+    {
+    mask_index=-1;
+    }
+    else 
+    {
+    mask_index = jmp_through_platform1M;
+    }
+}
+
+Draw Event:
+
+execute code:
+
+///Draw sprite
+
+draw_sprite(jmp_through_platform1M,0,x,y);
+
+______________________________________________________
+
+Information about object: jmp_through_platR
+Sprite: jmp_through_platform1R
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Setando sem sprite
+
+sprite_index=-1;
+
+Step Event:
+
+execute code:
+
+/// Se o player está ou não está acima
+
+if(instance_exists(Player))
+{
+    if (round(Player.bbox_bottom)>y)
+    {mask_index=-1;}
+    else 
+    {mask_index = jmp_through_platform1M;}
+}
+
+Draw Event:
+
+execute code:
+
+///Draw sprite
+
+draw_sprite(jmp_through_platform1R,0,x,y);
+
+______________________________________________________
+
+Information about object: jmp_though_platL
+Sprite: jmp_through_platform1L
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Setando sem sprite
+
+sprite_index=-1;
+
+Step Event:
+
+execute code:
+
+/// Se o player está ou não está acima
+
+if(instance_exists(Player))
+{
+    if (round(Player.bbox_bottom)>y)
+    {mask_index=-1;}
+    else 
+    {mask_index = jmp_through_platform1M;}
+}
+
+Draw Event:
+
+execute code:
+
+///Draw sprite
+
+draw_sprite(jmp_through_platform1L,0,x,y);
+
+______________________________________________________
+
+Information about object: Big_Grey
+Sprite: sprite58
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+______________________________________________________
+
+Information about object: Spike_block
+Sprite: Spikes
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+/// Criando hitbox
+
+instance_create(x, y, Spike_hitbox)
+
+
+
+______________________________________________________
+
+Information about object: Spike_hitbox
+Sprite: Spike_col
+Solid: false
+Visible: false
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Step Event:
+
+execute code:
+
+/// Machucando o jogador
+
+if(place_meeting(x,y-1,Player))
+{
+    if(!Player.ivul)
+    {
+    Player.HP-=40;
+    Player.minor_dmg=1; 
+    Player.vsp=-67;
+    }
+}
+
+______________________________________________________
+
+Information about object: Force_field
+Sprite: Energy_field
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: Wall_pr
+Children: 
+Mask: 
+
+No Physics Object
+Step Event:
+
+execute code:
+
+///Animação
+
+if(global.Efield)
+{image_speed=0.3;}
+else
+{instance_destroy();}
+
+______________________________________________________
+
+Information about object: Energy_Ball
+Sprite: Glowing_Ball
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Step Event:
+
+execute code:
+
+///Animação
+
+if(global.Efield)
+{image_speed=0.3;}
+else
+{instance_destroy();}
+
+
+execute code:
+
+///Sendo atacado
+
+if(place_meeting(x,y,Punch_Hitbox))
+{
+    global.Efield=0;
+    instance_create(x-9,y+2,obj_hit_effect)
+}
+
+______________________________________________________
+
+Information about object: obj_coin
+Sprite: Coin
+Solid: false
+Visible: true
+Depth: 0
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Status
+
+alive=1;
+
+image_speed=0.3;
+
+Step Event:
+
+execute code:
+
+///Colisão com o Player
+
+if (alive=1)
+{
+
+if(place_meeting(x,y,Player))
+{
+    Player.HP+=15;
+    Player.current_score+=200;
+    instance_create(x,y,obj_coin_effect)
+    persistent=true;
+    alive=0;
+}
+
+}
+if(alive==0)
+{
+sprite_index=-1;
+}
+
+
+
+______________________________________________________
+
+Information about object: obj_coin_effect
+Sprite: Coin_sparks
+Solid: false
+Visible: true
+Depth: -10000
+Persistent: false
+Parent: 
+Children: 
+Mask: 
+
+No Physics Object
+Create Event:
+
+execute code:
+
+///Status
+
+counter=0;
+
+Step Event:
+
+execute code:
+
+///efeito da moeda
+
+if(counter>1)
+{
+image_speed=0;
+hsp=0;
+image_index=0;
+sprite_index=Coin_sparks;
+    if(counter>
+    {
+    image_index=1;
+    sprite_index=Coin_sparks;
+        if(counter>
+        {
+        image_index=2;
+        sprite_index=Coin_sparks;
+            if(counter>
+            {
+            image_index=3;
+            sprite_index=Coin_sparks;
+                if(counter>
+                {
+                image_index=4;
+                sprite_index=Coin_sparks;
+                    if(counter>
+                    {
+                    image_index=5;
+                    sprite_index=Coin_sparks;
+                        if(counter>
+                        {
+                        image_index=6;
+                        sprite_index=Coin_sparks;
+                            if(counter>
+                            {
+                            instance_destroy();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+counter++;
+
+if(counter==1)
+{audio_play_sound(coin_noise, 10, false);}
+
+______________________________________________________
+
